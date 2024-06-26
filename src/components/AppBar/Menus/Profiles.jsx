@@ -33,7 +33,7 @@ function Profiles() {
           aria-expanded={open ? 'true' : undefined}
         >
           <Avatar
-            sx={{ width: 30, height: 30 }}
+            sx={{ width: 34, height: 34 }}
             alt='Hein'
             src='https://img.freepik.com/premium-photo/rick-sanchez-rick-morty-cartoon-character-generative-ai_934475-8630.jpg?w=740'
           />
