@@ -10,13 +10,18 @@ import {
   useSensors,
   DragOverlay,
   defaultDropAnimationSideEffects,
-  closestCorners
+  closestCorners,
+  pointerWithin,
+  // rectIntersection,
+  getFirstCollision
+  // closestCenter
 } from '@dnd-kit/core'
 import { arrayMove } from '@dnd-kit/sortable'
-import { useEffect, useState } from 'react'
-import { cloneDeep } from 'lodash'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import { cloneDeep, isEmpty } from 'lodash'
 import Columns from './ListColumns/Columns/Columns'
 import Card from './ListColumns/Columns/ListCards/Card/Card'
+import { generatePlaceholderCard } from '~/utils/formatter'
 
 const ACTIVE_DARAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DARAG_ITEM_TYPE_COLUMN',
@@ -42,6 +47,9 @@ const BoardContent = ({ board }) => {
   const [activeDragItemType, setactiveDragItemType] = useState(null)
   const [activeDragItemData, setactiveDragItemData] = useState(null)
   const [oldColumnWhenDraggingCard, setoldColumnWhenDraggingCard] = useState(null)
+
+  //Diem va cham cuoi cung cua phan tu card duoc keo
+  const lastOverId = useRef(null)
 
   useEffect(() => {
     setOrderedColumnn(mapOrder(board?.columns, board?.columnOrderIds, '_id'))
@@ -78,6 +86,12 @@ const BoardContent = ({ board }) => {
       if (nextActiveColumn) {
         //kiem tra card dang keo va xoa no khoi column hien tai
         nextActiveColumn.cards = nextActiveColumn.cards.filter(card => card._id !== activeDraggingCardId)
+
+        //Them card placeholder neu column rong
+        if (isEmpty(nextActiveColumn.cards)) {
+          nextActiveColumn.cards = [generatePlaceholderCard(nextActiveColumn)]
+        }
+
         //Cap nhat lai mang orderCardIds
         nextActiveColumn.cardOrderIds = nextActiveColumn.cards.map(card => card._id)
       }
@@ -85,6 +99,10 @@ const BoardContent = ({ board }) => {
       if (nextOverColumn) {
         //kiem tra card dang keo co ton tai o overColumn chua neu co thi xoa no truoc
         nextOverColumn.cards = nextOverColumn.cards.filter(card => card._id !== activeDraggingCardId)
+
+        //Xoa placeholderCard neu no ton tai trong column dinh keo card toi
+        nextOverColumn.cards = nextOverColumn.cards.filter(card => !card.FE_PlaceholderCard)
+
         //tiep theo them card dang keo vao overColumn theo vi tri moi
         nextOverColumn.cards = nextOverColumn.cards.toSpliced(
           newCardIndex,
@@ -95,6 +113,7 @@ const BoardContent = ({ board }) => {
         nextOverColumn.cardOrderIds = nextOverColumn.cards.map(card => card._id)
       }
 
+      // console.log(nextColumns)
       return nextColumns
     })
   }
@@ -230,12 +249,59 @@ const BoardContent = ({ board }) => {
     sideEffects: defaultDropAnimationSideEffects({ styles: { active: { opacity: '0.5' } } })
   }
 
+  //custom that toan va cham khi keo tha card giua nhieu column
+  //args la cac tham so
+  const collisionDetectionStrategy = useCallback((args) => {
+    //truong hop keo column thi dung thuat toan mac dinh cua collisionDetection la closestCorners hoac closestCenter
+    if (activeDragItemType === ACTIVE_DARAG_ITEM_TYPE.COLUMN) {
+      return closestCorners({ ...args })
+    }
+
+    //tim cac diem giao nhau voi con tro
+    const pointerIntersections = pointerWithin(args)
+    // console.log(pointerIntersections)
+    if (!pointerIntersections?.length) return
+
+    //thuat toan phat hien va cham tra ve cac mang va cham
+    // const intersections = !!pointerIntersections?.length
+    //   ? pointerIntersections
+    //   : rectIntersection(args)
+    // console.log(intersections)
+
+    //tim overId dau tien trong mang va cham ben tren
+    let overId = getFirstCollision(pointerIntersections, 'id')
+    if (overId) {
+      //tim cot duoc keo den
+      const checkColumn = orderedColumns.find(column => column._id === overId)
+      // console.log(checkColumn)
+      // console.log(closestCenter({ ...args }))
+      if (checkColumn) {
+        overId = closestCorners({
+          ...args,
+          droppableContainers: args.droppableContainers.filter(container => (
+            container.id !== overId && (checkColumn?.cardOrderIds?.includes(container.id))
+          ))
+        })[0]?.id
+        // console.log(overId)
+      }
+      lastOverId.current = overId
+      return [{ id: overId }]
+    }
+
+    return lastOverId.current ? [{ id: lastOverId.current }] : []
+
+  }, [activeDragItemType, orderedColumns])
+
 
   return (
 
     <DndContext
+      //cam bien phan biet con tro hay cham man hinh
       sensors={sensors}
-      collisionDetection={closestCorners}
+      // collisionDetection={closestCorners}
+
+      //Custom thuat toan phat hien va cham
+      collisionDetection={collisionDetectionStrategy}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd} >
