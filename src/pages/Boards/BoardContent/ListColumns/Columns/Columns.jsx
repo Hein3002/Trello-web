@@ -1,5 +1,6 @@
 
 import { useState } from 'react'
+import { toast } from 'react-toastify'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Divider from '@mui/material/Divider'
@@ -59,7 +60,7 @@ function Columns({ column }) {
 
   const addNewCard = () => {
     if (!newCardTitle) {
-      console.log('Error')
+      toast.error('Please enter Card Title')
       return
     }
 
@@ -180,6 +181,7 @@ function Columns({ column }) {
                 type="text"
                 size='small'
                 variant='outlined'
+                data-no-dnd= "true"
                 autoFocus
                 value={newCardTitle}
                 onChange={(e) => setNewCardTitle(e.target.value)}
@@ -201,6 +203,7 @@ function Columns({ column }) {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button
                   onClick={addNewCard}
+                  data-no-dnd= "true"
                   variant="contained" color="success" size="small"
                   sx={{
                     boxShadow: 'none',
