@@ -16,7 +16,7 @@ import {
   getFirstCollision
   // closestCenter
 } from '@dnd-kit/core'
-import { MouseSensor, TouchSensor} from '~/customLibraries/DndKitSensors'
+import { MouseSensor, TouchSensor } from '~/customLibraries/DndKitSensors'
 import { arrayMove } from '@dnd-kit/sortable'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { cloneDeep, isEmpty } from 'lodash'
@@ -29,7 +29,7 @@ const ACTIVE_DARAG_ITEM_TYPE = {
   CARD: 'ACTIVE_DARAG_ITEM_TYPE_CARD'
 }
 
-const BoardContent = ({ board }) => {
+const BoardContent = ({ board, createNewColumn, createNewCard }) => {
 
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
 
@@ -312,7 +312,11 @@ const BoardContent = ({ board }) => {
         height: (theme) => theme.trello.boardContentHeight,
         p: '10px 0'
       }}>
-        <ListColumns columns={orderedColumns} />
+        <ListColumns
+          columns={orderedColumns}
+          createNewColumn={createNewColumn}
+          createNewCard={createNewCard}
+        />
         <DragOverlay dropAnimation={customdropAnimation}>
           {!activeDragItemType && null}
           {activeDragItemType === ACTIVE_DARAG_ITEM_TYPE.COLUMN && <Columns column={activeDragItemData} />}
