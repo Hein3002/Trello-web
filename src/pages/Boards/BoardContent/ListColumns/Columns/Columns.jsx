@@ -26,7 +26,7 @@ import { mapOrder } from '~/utils/sort'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-function Columns({ column }) {
+function Columns({ column, createNewCard }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
     data: { ...column }
@@ -58,14 +58,21 @@ function Columns({ column }) {
 
   const [newCardTitle, setNewCardTitle] = useState('')
 
-  const addNewCard = () => {
+  const addNewCard = async () => {
     if (!newCardTitle) {
       toast.error('Please enter Card Title')
       return
     }
 
     // console.log(newCardTitle)
-    //Call API
+    //Tao du lieu Card de goi API
+    const newCardData = {
+      title: newCardTitle,
+      columnId: column._id
+    }
+
+    //Call API tu prop duoc truyen tu component _id.jsx
+    await createNewCard(newCardData)
 
     //Dong lai trang thai them column moi & Clear Input
     toggleOpenNewCardForm()

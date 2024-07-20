@@ -9,20 +9,25 @@ import CloseIcon from '@mui/icons-material/Close'
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 
 
-function ListColumns({ columns }) {
+function ListColumns({ columns, createNewColumn, createNewCard }) {
   const [openNewColumnForm, setOpenNewColumnForm] = useState(false)
   const toggleOpenNewColumnForm = () => setOpenNewColumnForm(!openNewColumnForm)
 
   const [newColumnTitle, setNewColumnTitle] = useState('')
 
-  const addNewColumn = () => {
+  const addNewColumn = async () => {
     if (!newColumnTitle) {
       toast.error('Please enter Column Title')
       return
     }
 
-    // console.log(newColumnTitle)
+    //Tao du lieu Column de goi API
+    const newColumnData = {
+      title: newColumnTitle
+    }
+
     //Call API
+    await createNewColumn(newColumnData)
 
     //Dong lai trang thai them column moi & Clear Input
     toggleOpenNewColumnForm()
@@ -43,7 +48,7 @@ function ListColumns({ columns }) {
 
         {/* Box Column */}
 
-        {columns?.map((column) => <Columns key={column._id} column={column} />)}
+        {columns?.map((column) => <Columns key={column._id} column={column} createNewCard={createNewCard}/>)}
 
         {/* Box button add new columns */}
         {!openNewColumnForm
