@@ -39,6 +39,7 @@ function Board() {
     newBoard.columnOrderIds.push(createdColumn._id)
     setBoard(newBoard)
   }
+  
   const createNewCard = async (newCardData) => {
     const createdCard = await createNewCardAPI({
       ...newCardData,
@@ -48,7 +49,7 @@ function Board() {
     //cap nhat lai state board
     const newBoard = { ...board }
     const columnToUpdate = newBoard.columns.find(column => column._id === createdCard.columnId)
-    if (columnToUpdate) {
+    if ( columnToUpdate ) {
       columnToUpdate.cards.push(createdCard)
       columnToUpdate.cardOrderIds.push(createdCard._id)
     }
@@ -67,7 +68,6 @@ function Board() {
     //Call Api update board
     await updateBoardDetailsAPI(newBoard._id, { columnOrderIds: dndOrderedColumnsIds })
   }
-
   return (
     <Container disableGutters maxWidth={false} sx={{ height: '100vh' }}>
       <AppBar />

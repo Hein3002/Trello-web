@@ -28,8 +28,8 @@ const ACTIVE_DARAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DARAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DARAG_ITEM_TYPE_CARD'
 }
-
 const BoardContent = ({ board, createNewColumn, createNewCard, moveColumn }) => {
+
 
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
 
