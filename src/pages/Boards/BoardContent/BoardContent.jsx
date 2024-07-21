@@ -28,8 +28,8 @@ const ACTIVE_DARAG_ITEM_TYPE = {
   COLUMN: 'ACTIVE_DARAG_ITEM_TYPE_COLUMN',
   CARD: 'ACTIVE_DARAG_ITEM_TYPE_CARD'
 }
+const BoardContent = ({ board, createNewColumn, createNewCard, moveColumn }) => {
 
-const BoardContent = ({ board, createNewColumn, createNewCard }) => {
 
   // const pointerSensor = useSensor(PointerSensor, { activationConstraint: { distance: 10 } })
 
@@ -232,10 +232,8 @@ const BoardContent = ({ board, createNewColumn, createNewCard }) => {
         const newColumnIndex = orderedColumns.findIndex(c => c._id === over.id)
         //Dung arrayMove de sap xep lai columns ban dau
         const dndOrderedColumns = arrayMove(orderedColumns, oldColumnIndex, newColumnIndex)
-        //2 log de su ly goi api
-        // const dndOrderedColumnsIds = dndOrderedColumns.map(c => c._id)
-        // console.log(dndOrderedColumnsIds)
-        // console.log(dndOrderedColumns)
+        //goi fuc o component cha _id.jsx
+        moveColumn(dndOrderedColumns)
 
         setOrderedColumnn(dndOrderedColumns)
       }
