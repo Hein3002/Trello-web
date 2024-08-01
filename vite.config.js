@@ -4,6 +4,10 @@ import svgr from 'vite-plugin-svgr'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  //Cho phep vite su dung process.env mac dinh thi phai dung import.meta.env
+  define: {
+    'process.env': process.env
+  },
   plugins: [
     react(),
     svgr()
