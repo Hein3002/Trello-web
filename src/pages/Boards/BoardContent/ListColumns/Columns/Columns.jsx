@@ -20,13 +20,13 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import CloseIcon from '@mui/icons-material/Close'
+import { useConfirm } from 'material-ui-confirm'
 import ListCards from './ListCards/ListCards'
-import { mapOrder } from '~/utils/sort'
 
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 
-function Columns({ column, createNewCard }) {
+function Columns({ column, createNewCard, deleteColumnDetails }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: column._id,
     data: { ...column }
@@ -49,7 +49,7 @@ function Columns({ column, createNewCard }) {
     setAnchorEl(null)
   }
 
-  const oderedCards = mapOrder(column?.cards, column?.cardOrderIds, '_id')
+  const oderedCards = column.cards
 
 
   //
@@ -72,11 +72,27 @@ function Columns({ column, createNewCard }) {
     }
 
     //Call API tu prop duoc truyen tu component _id.jsx
-    await createNewCard(newCardData)
+    createNewCard(newCardData)
 
     //Dong lai trang thai them column moi & Clear Input
     toggleOpenNewCardForm()
     setNewCardTitle('')
+  }
+
+  //Su li xoa 1 column va cards trong no
+  const confirmDeleteColumn = useConfirm()
+  const handleDeleteColumn = () => {
+    confirmDeleteColumn({
+      title: 'Delete Column',
+      description: 'This action will permamently delete your Column and its Cards! Are you sure?',
+      confirmationText: 'Confirm',
+      cancellationText: 'Cancel'
+      // description: 'Nhâp Hein thì ms đc confirm',
+      // confirmationKeyword: 'Hein'
+
+    }).then(() => {
+      deleteColumnDetails(column._id)
+    }).catch(() => {})
   }
 
   return (
@@ -124,12 +140,21 @@ function Columns({ column, createNewCard }) {
               anchorEl={anchorEl}
               open={open}
               onClose={handleClose}
+              onClick={handleClose}
               MenuListProps={{
                 'aria-labelledby': 'basic-column-dropdown'
               }}
             >
-              <MenuItem>
-                <ListItemIcon><AddCardIcon fontSize="small" /></ListItemIcon>
+              <MenuItem
+                sx={{
+                  '&:hover': {
+                    color: 'success.light',
+                    '& .add-card-icon': { color: 'success.light' }
+                  }
+                }}
+                onClick={toggleOpenNewCardForm}
+              >
+                <ListItemIcon><AddCardIcon className='add-card-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Add new card</ListItemText>
               </MenuItem>
               <MenuItem>
@@ -145,8 +170,16 @@ function Columns({ column, createNewCard }) {
                 <ListItemText>Paste</ListItemText>
               </MenuItem>
               <Divider />
-              <MenuItem>
-                <ListItemIcon><DeleteForeverIcon fontSize="small" /></ListItemIcon>
+              <MenuItem
+                onClick={handleDeleteColumn}
+                sx={{
+                  '&:hover': {
+                    color: 'warning.dark',
+                    '& .delete-forever-icon': { color: 'warning.dark' }
+                  }
+                }}
+              >
+                <ListItemIcon><DeleteForeverIcon className='delete-forever-icon' fontSize="small" /></ListItemIcon>
                 <ListItemText>Remove this column</ListItemText>
               </MenuItem>
               <MenuItem>
@@ -188,7 +221,7 @@ function Columns({ column, createNewCard }) {
                 type="text"
                 size='small'
                 variant='outlined'
-                data-no-dnd= "true"
+                data-no-dnd="true"
                 autoFocus
                 value={newCardTitle}
                 onChange={(e) => setNewCardTitle(e.target.value)}
@@ -210,7 +243,7 @@ function Columns({ column, createNewCard }) {
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Button
                   onClick={addNewCard}
-                  data-no-dnd= "true"
+                  data-no-dnd="true"
                   variant="contained" color="success" size="small"
                   sx={{
                     boxShadow: 'none',
